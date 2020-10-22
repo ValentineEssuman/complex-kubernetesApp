@@ -1,9 +1,37 @@
+# To do deploy app on Google Cloud Kubernetes
+# Install Google Cloud SDK CLI
+# Configure the SDK with out Google Cloud auth info
+# Create a simple docker to run Travis uisng ruby to encrypt service account file
+# Login to docker CLI possible usin
+
+#
 sudo: required
 services:
   - docker
+#getting git SHA
+env:
+  global:
+    - SHA=$(git rev-parse HEAD)
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=1
 before_install:
   - openssl aes .... d
   - curl https://sdk.cloud.google.com | bash > /dev/null;
   - source $HOME/google-cloud-sdk/path.bash.inc
   - gcloud components update kubectl
   - gloud auth activate-service-account --key-file service-account.json
+  - gloud config set project projectid
+  - gcloud config set compute/zone us-central-a
+  - gcloud container clusters get-credentials multi-cluster
+
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password
+  - docker build -t just4docker/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run -e CI=true USERNAME/docker-react npm test
+
+#deploy section
+deploy:
+  provider: script
+  script: bash ./deploy.sh
+  on:
+    branch: master
